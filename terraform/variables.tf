@@ -25,3 +25,6 @@ variable FROM_EMAIL {
 variable AWS_DEFAULT_REGION {
     type = string
 }
+variable AWS_BUCKET {
+    type = string
+}
