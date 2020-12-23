@@ -14,7 +14,8 @@ prep_deployment_package () {
     cd ${original_wd}
 
     # Upload the deployment package
-    aws s3 cp function.zip s3://${ZIP_FILE_BUCKET}/${ZIP_FILE_KEY}
+    # aws s3 cp function.zip s3://${ZIP_FILE_BUCKET}/${ZIP_FILE_KEY}
+    aws s3 cp function.zip s3://apc-tf/${ZIP_FILE_KEY}
 }
 
 deploy () {
