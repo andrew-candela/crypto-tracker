@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "crypto_batch" {
-  function_name = "crypto_batch"
-  role          = aws_iam_role.crypto_batch.arn
-  s3_bucket                      = "apc-tf"
+  function_name                  = "crypto_batch"
+  role                           = aws_iam_role.crypto.arn
+  s3_bucket                      = "${var.AWS_BUCKET}"
   s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
   handler                        = "service.get_metrics.lambda_handler"
   memory_size                    = 3008
@@ -22,8 +22,6 @@ resource "aws_lambda_function" "crypto_batch" {
       LOG_LEVEL = "${var.LOG_LEVEL}",
       ALERT_THRESHOLD = "${var.ALERT_THRESHOLD}",
       FROM_EMAIL = "${var.FROM_EMAIL}",
-      AWS_DEFAULT_REGION = "${var.AWS_DEFAULT_REGION}",
     }
   }
 }
-

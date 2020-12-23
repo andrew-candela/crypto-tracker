@@ -1,12 +1,15 @@
 provider "aws" {
   version = "~> 2.0"
-  region  = "${var.AWS_DEFAULT_REGION}"
+  # Replace with your own bucket and region
+  region  = "us-west-2"
 }
 
 terraform {
   backend "s3" {
-    bucket = "${var.AWS_BUCKET}"
+    # Replace with your own bucket and region
+    bucket = "apc-tf"
     key    = "crypto_tracker/terraform.tfstate"
-    region = "${var.AWS_DEFAULT_REGION}"
+    # Replace with your own bucket and region
+    region = "us-west-2"
   }
 }
