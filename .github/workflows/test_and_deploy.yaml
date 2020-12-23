@@ -43,7 +43,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-        ZIP_FILE_BUCKET: ${{ secrets.ZIP_FILE_BUCKET }}
+        ZIP_FILE_BUCKET: apc-tf
         ZIP_FILE_KEY: lambda_functions_deployment_packages/crypto/function.zip
 
     steps:
