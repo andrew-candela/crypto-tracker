@@ -27,9 +27,9 @@ deploy () {
 
 main () {
     prep_deployment_package
-    for lambda_function in crypto_batch \
-                           crypto_email \
-                           crypto_metrics
+    for lambda_function in crypto_batch 
+                        #    crypto_email \
+                        #    crypto_metrics
     do
         deploy $lambda_function
     done
