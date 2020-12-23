@@ -16,7 +16,7 @@ prep_deployment_package () {
     # Upload the deployment package
     # aws s3 cp function.zip s3://${ZIP_FILE_BUCKET}/${ZIP_FILE_KEY}
     echo "running s3 cp function"
-    aws s3 cp function.zip s3://apc-tf/${ZIP_FILE_KEY}
+    aws s3 cp function.zip s3://apc-tf/lambda_functions_deployment_packages/crypto/function.zip
 }
 
 deploy () {
