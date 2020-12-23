@@ -10,11 +10,12 @@ prep_deployment_package () {
     pip install .
     deactivate
     cd venv/lib/python3.7/site-packages
-    zip -r9 ${original_wd}/function.zip .
+    zip -r9 -q ${original_wd}/function.zip .
     cd ${original_wd}
 
     # Upload the deployment package
     # aws s3 cp function.zip s3://${ZIP_FILE_BUCKET}/${ZIP_FILE_KEY}
+    echo "running s3 cp function"
     aws s3 cp function.zip s3://apc-tf/${ZIP_FILE_KEY}
 }
 
