@@ -1,0 +1,16 @@
+# spins up a PG database for testing the flask app locally
+
+version: '3.7'
+services:
+    postgres:
+        image: postgres:9.6
+        stop_grace_period: 30s
+        environment:
+            - POSTGRES_USER=${PG_USER}
+            - POSTGRES_PASSWORD=${PG_PASSWORD}
+            - POSTGRES_DB=${PG_DATABASE}
+        volumes:
+            - ./.database:/var/lib/postgresql
+        # run on nonstandard port in case you have other DBs running
+        ports:
+            - "2345:5432"
