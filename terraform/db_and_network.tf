@@ -37,8 +37,8 @@ resource aws_security_group wide_open {
     ingress {
         description = "all db ingress"
         protocol = "tcp"
-        from_port = 5432
-        to_port = 5432
+        from_port = var.PG_PORT
+        to_port = var.PG_PORT
         cidr_blocks = ["0.0.0.0/0"]
     }
     egress {

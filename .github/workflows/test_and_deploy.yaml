@@ -10,28 +10,28 @@ on:
   push:
 
 jobs:
-  test:
-    name: Run test suite
+  # test:
+  #   name: Run test suite
 
-    runs-on: ubuntu-latest
-    container: python:3.7-slim-buster
+  #   runs-on: ubuntu-latest
+  #   container: python:3.7-slim-buster
 
-    env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #   env:
+  #       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-    steps:
-        - name: Git Checkout
-          uses: actions/checkout@v2
-          with:
-            fetch-depth: 1
-        - name: Set up virtual env and run tests
-          run: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
-            pip install -e .
-            pytest
+  #   steps:
+  #       - name: Git Checkout
+  #         uses: actions/checkout@v2
+  #         with:
+  #           fetch-depth: 1
+  #       - name: Set up virtual env and run tests
+  #         run: |
+  #           python3 -m venv venv
+  #           . venv/bin/activate
+  #           pip install -r requirements.txt
+  #           pip install -e .
+  #           pytest
 
   deploy:
     name: Deploy Lambda package
@@ -42,7 +42,7 @@ jobs:
     env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        AWS_DEFAULT_REGION: us-west-2
         ZIP_FILE_BUCKET: apc-tf
         ZIP_FILE_KEY: lambda_functions_deployment_packages/crypto/function.zip
 
@@ -58,4 +58,5 @@ jobs:
           apt-get -y install awscli
       - name: Deploy Lambda Function Package
         run: |
-          bash deploy.sh
+          # bash deploy.sh
+          aws s3 ls

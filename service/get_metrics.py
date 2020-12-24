@@ -109,6 +109,7 @@ def fetch_email_recipients(conn: connection) -> List[str]:
 def lambda_handler(event={}, context={}) -> None:
     metrics = get_metrics()
     data_dict = data_to_dict(metrics)
+    logger.info("writing metrics to DB")
     with PG.create_connection() as conn:
         write_metrics(metrics, conn)
         email_recipients = fetch_email_recipients(conn)
