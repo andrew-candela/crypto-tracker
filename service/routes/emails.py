@@ -56,7 +56,7 @@ def lambda_handler(event: {}, context: {}) -> str:
 if __name__ == "__main__":
     event = {
         'httpMethod': 'POST',
-        'body': '{"email":"andrewpcandela@gmail.com"}'
+        'body': '{"email":"email@email.com"}'
     }
     resp = lambda_handler(event, {})
     print(resp)
