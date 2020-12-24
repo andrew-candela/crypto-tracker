@@ -38,9 +38,9 @@ def generate_historical_sql_command():
 # This will be the logic to satisfy requirement 3
 # I'll loop through each metric in each record of data
 # and then compare if to the average of the last hour.
-# The run time is O(#metrics * #records).
+# The time complexity is O(#metrics * #records).
 # It would be best to vectorize this operation on the next go.
-# For now it runs fast enough.
+# For now it runs fast enough since there are about 10 metrics and 1000 records
 def compare_metrics(data_dict: Dict[str, Any],
                     averages: List[RealDictRow]) -> Dict[str, Any]:
     logger.debug(f"comparing {len(averages)} average records to {len(data_dict)} recent records")

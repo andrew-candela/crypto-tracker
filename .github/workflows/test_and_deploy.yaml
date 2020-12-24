@@ -71,9 +71,10 @@ jobs:
 
           aws s3 cp function.zip s3://${ZIP_FILE_BUCKET}/${ZIP_FILE_KEY}
           
-          aws lambda update-function-code \
-            --function-name crypto_batch \
-            --s3-bucket ${ZIP_FILE_BUCKET} \
-            --s3-key ${ZIP_FILE_KEY}
-
-
+          for function_name in crypto_batch crypto_inspect crypto_add_emails crypto_find_metrics; \
+          do \
+            aws lambda update-function-code \
+              --function-name crypto_batch \
+              --s3-bucket ${ZIP_FILE_BUCKET} \
+              --s3-key ${ZIP_FILE_KEY}; \
+          done
