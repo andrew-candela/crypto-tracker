@@ -1,7 +1,7 @@
 resource "aws_lambda_function" "crypto_batch" {
   function_name                  = "crypto_batch"
   role                           = aws_iam_role.crypto.arn
-  s3_bucket                      = "${var.AWS_BUCKET}"
+  s3_bucket                      = var.AWS_BUCKET
   s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
   handler                        = "service.get_metrics.lambda_handler"
   memory_size                    = 3008
@@ -29,7 +29,7 @@ resource "aws_lambda_function" "crypto_batch" {
 resource "aws_lambda_function" "crypto_inspect" {
   function_name                  = "crypto_inspect"
   role                           = aws_iam_role.crypto.arn
-  s3_bucket                      = "${var.AWS_BUCKET}"
+  s3_bucket                      = var.AWS_BUCKET
   s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
   handler                        = "service.routes.inspect_metrics.lambda_handler"
   memory_size                    = 3008
