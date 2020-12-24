@@ -33,48 +33,48 @@ jobs:
             pip install -e .
             pytest
 
-  # deploy:
-  #   name: Deploy Lambda package
-  #   needs:
-  #     - test
-  #   runs-on: ubuntu-latest
-  #   container: python:3.7-slim-buster
-  #   env:
-  #       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #       AWS_DEFAULT_REGION: us-west-2
-  #       ZIP_FILE_BUCKET: apc-tf
-  #       ZIP_FILE_KEY: lambda_functions_deployment_packages/crypto/function.zip
+  deploy:
+    name: Deploy Lambda package
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    container: python:3.7-slim-buster
+    env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+        ZIP_FILE_BUCKET: ${{ secrets.ZIP_FILE_BUCKET }}
+        ZIP_FILE_KEY: lambda_functions_deployment_packages/crypto/function.zip
 
-  #   steps:
-  #     - name: Git Checkout
-  #       uses: actions/checkout@v2
-  #       with:
-  #         fetch-depth: 1
-  #     - name: Install Packages
-  #       run: |
-  #         apt-get update
-  #         apt-get -y install zip
-  #         apt-get -y install awscli
-  #     - name: Deploy Lambda Function Package
-  #       run: |
-  #         # bash deploy.sh
-  #         original_wd=`pwd`
-  #         python3 -m venv venv
-  #         . venv/bin/activate
-  #         pip install -r requirements.txt
-  #         pip install .
-  #         deactivate
-  #         cd venv/lib/python3.7/site-packages
-  #         zip -r9 -q ${original_wd}/function.zip .
-  #         cd ${original_wd}
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Install Packages
+        run: |
+          apt-get update
+          apt-get -y install zip
+          apt-get -y install awscli
+      - name: Deploy Lambda Function Package
+        run: |
+          # bash deploy.sh
+          original_wd=`pwd`
+          python3 -m venv venv
+          . venv/bin/activate
+          pip install -r requirements.txt
+          pip install .
+          deactivate
+          cd venv/lib/python3.7/site-packages
+          zip -r9 -q ${original_wd}/function.zip .
+          cd ${original_wd}
 
-  #         aws s3 cp function.zip s3://${ZIP_FILE_BUCKET}/${ZIP_FILE_KEY}
+          aws s3 cp function.zip s3://${ZIP_FILE_BUCKET}/${ZIP_FILE_KEY}
           
-  #         for function_name in crypto_batch crypto_email crypto_metrics; \
-  #         do \
-  #           aws lambda update-function-code \
-  #             --function-name ${function_name} \
-  #             --s3-bucket ${ZIP_FILE_BUCKET} \
-  #             --s3-key ${ZIP_FILE_KEY}; \
-  #         done
+          for function_name in crypto_batch crypto_email crypto_metrics; \
+          do \
+            aws lambda update-function-code \
+              --function-name ${function_name} \
+              --s3-bucket ${ZIP_FILE_BUCKET} \
+              --s3-key ${ZIP_FILE_KEY}; \
+          done
