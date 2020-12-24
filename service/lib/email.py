@@ -14,7 +14,8 @@ aws_region = os.environ.get("AWS_DEFAULT_REGION", "us-west-2")
 
 class Emailer():
 
-    def send_email(self, metrics: Dict[str, Any], email_addresses: List) -> None:
+    @staticmethod
+    def send_email(metrics: Dict[str, Any], email_addresses: List) -> None:
         if not email_addresses:
             logger.warning("Tried to alert but there were no email addresses to send to")
             return None

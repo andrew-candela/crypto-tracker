@@ -9,7 +9,7 @@ from service.lib.pg import PG, RealDictRow, connection
 from service.lib.email import Emailer
 from service import LOG_LEVEL, CRYPTO_METRICS, ALERT_THRESHOLD, METRIC_URL
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 import time
 from collections import defaultdict
 
@@ -42,7 +42,7 @@ def generate_historical_sql_command():
 # It would be best to vectorize this operation on the next go.
 # For now it runs fast enough.
 def compare_metrics(data_dict: Dict[str, Any],
-                    averages: List[RealDictRow]) -> List[Dict[str, Any]]:
+                    averages: List[RealDictRow]) -> Dict[str, Any]:
     logger.debug(f"comparing {len(averages)} average records to {len(data_dict)} recent records")
     anomolous_metrics = defaultdict(dict)
     for average_rec in averages:
@@ -52,7 +52,7 @@ def compare_metrics(data_dict: Dict[str, Any],
                 # many metrics are often 0 or close to it
                 if average_rec[metric] > .00001 and \
                   float(average_rec[metric]) * float(ALERT_THRESHOLD) < data_dict[symbol][metric]:
-                    anomolous_metrics[symbol][metric] = float(average_rec[metric])
+                    anomolous_metrics[symbol][metric] = float(data_dict[symbol][metric])
                     logger.debug(
                         f"symbol:{symbol} metric: {metric} average last hr: "
                         f"{average_rec[metric]}  current value: {data_dict[symbol][metric]}"
@@ -66,9 +66,12 @@ def compare_metrics(data_dict: Dict[str, Any],
     return anomolous_metrics
 
 
-def get_utc_offset() -> int:
+def get_utc_offset() -> Union[int, str]:
     offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
-    return int(offset / 60 / 60 * -1)
+    offset = int(offset / 60 / 60 * -1)
+    if offset == 0:
+        offset = "-0"
+    return offset
 
 
 def get_metrics() -> List[Dict[str, Any]]:
@@ -94,6 +97,7 @@ def check_alert(metrics, conn: connection, emails: List[str]):
     sql_command = generate_historical_sql_command()
     averages = PG.fetch_data(conn, sql_command)
     alertable_metrics = compare_metrics(metrics, averages)
+    print(alertable_metrics)
     if alertable_metrics:
         em = Emailer()
         em.send_email(alertable_metrics, emails)
