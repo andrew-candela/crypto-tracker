@@ -65,6 +65,8 @@ def fetch_rank(metric: str, symbol: str) -> Tuple[int]:
 
 
 def lambda_handler(event: {}, context: {}) -> str:
+    print(event)
+    print(context)
     historical_data = fetch_historical_performance(event['metric'], event['symbol'])
     (rank, total) = fetch_rank(event['metric'], event['symbol'])
     return json.dumps({
