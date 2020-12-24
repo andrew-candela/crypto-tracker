@@ -18,7 +18,12 @@ def fetch_metrics_and_symbols() -> str:
 
 
 def lambda_handler(event: {}, context: {}) -> str:
-    return fetch_metrics_and_symbols()
+    output = fetch_metrics_and_symbols()
+    response = {
+        'statusCode': 200,
+        'body': output
+    }
+    return response
 
 
 if __name__ == "__main__":

@@ -74,7 +74,7 @@ jobs:
           for function_name in crypto_batch crypto_inspect crypto_add_emails crypto_find_metrics; \
           do \
             aws lambda update-function-code \
-              --function-name crypto_batch \
+              --function-name ${function_name} \
               --s3-bucket ${ZIP_FILE_BUCKET} \
               --s3-key ${ZIP_FILE_KEY}; \
           done
