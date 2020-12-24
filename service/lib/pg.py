@@ -52,9 +52,26 @@ class PG():
             conn.commit()
 
     @staticmethod
+    def delete_records_from_table(key_col: str, keys: List[str],
+                                  table: str, conn: connection) -> None:
+        key_string = ','.join([f"'{key}'" for key in keys])
+        sql = f"DELETE FROM {table} WHERE {key_col} IN ({key_string});"
+        with conn.cursor() as cursor:
+            cursor.execute(sql)
+            conn.commit()
+
+    @staticmethod
     def fetch_data(conn: connection, sql_command: str) -> List[RealDictRow]:
         logger.debug(f"running:\n{sql_command}")
         with conn.cursor(cursor_factory=RealDictCursor) as cursor:
             cursor.execute(sql_command)
             records = cursor.fetchall()
         return records
+
+    @staticmethod
+    def stringify_sql_output(row: RealDictRow) -> RealDictRow:
+        """Makes rows returned by SQL query safe to be JSON serializable.
+        So far I've only had trouble with timestamps so I cast them as UnixTime."""
+
+        row['poll_time'] = row['poll_time'].strftime("%s")
+        return row

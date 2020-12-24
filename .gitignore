@@ -1,24 +1,19 @@
 .flake8
+.vscode
 
-
-#  Local .terraform directories
+# Terraform stuff
 **/.terraform/*
-
-# .tfstate files
 *.tfstate
 *.tfstate.*
-
-# .tfvars files
 *.tfvars
 
+# Python stuff
 **/venv
 __pycache__
 .pytest_cache
-
 *.egg-info
 
-.vscode
-
+# Misc
 .env
-
 .database/
+function.zip
