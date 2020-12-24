@@ -35,8 +35,8 @@ jobs:
 
   deploy:
     name: Deploy Lambda package
-    needs:
-      - test
+    # needs:
+      # - test
     runs-on: ubuntu-latest
     container: python:3.7-slim-buster
     env:
