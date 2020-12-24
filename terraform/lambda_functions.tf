@@ -26,12 +26,12 @@ resource "aws_lambda_function" "crypto_batch" {
   }
 }
 
-resource "aws_lambda_function" "crypto_inspect" {
-  function_name                  = "crypto_inspect"
+resource "aws_lambda_function" "crypto_metrics" {
+  function_name                  = "crypto_metrics"
   role                           = aws_iam_role.crypto.arn
   s3_bucket                      = var.AWS_BUCKET
   s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
-  handler                        = "service.routes.inspect_metric.lambda_handler"
+  handler                        = "service.routes.metrics.lambda_handler"
   memory_size                    = 3008
   reserved_concurrent_executions = -1
   runtime                        = "python3.7"
@@ -54,40 +54,12 @@ resource "aws_lambda_function" "crypto_inspect" {
   }
 }
 
-resource "aws_lambda_function" "crypto_find_metrics" {
-  function_name                  = "crypto_find_metrics"
+resource "aws_lambda_function" "crypto_email" {
+  function_name                  = "crypto_email"
   role                           = aws_iam_role.crypto.arn
   s3_bucket                      = var.AWS_BUCKET
   s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
-  handler                        = "service.routes.find_available_metrics.lambda_handler"
-  memory_size                    = 3008
-  reserved_concurrent_executions = -1
-  runtime                        = "python3.7"
-  timeout                        = 5
-  tracing_config {
-      mode = "PassThrough"
-  }
-  environment {
-    variables = {
-      LOG_LEVEL = "${var.LOG_LEVEL}",
-      PG_HOST = "${aws_db_instance.crypto_db.address}",
-      PG_PORT = "${var.PG_PORT}",
-      PG_DATABASE = "${var.PG_DATABASE}",
-      PG_USER = "${var.PG_USER}",
-      PG_PASSWORD = "${var.PG_PASSWORD}",
-      LOG_LEVEL = "${var.LOG_LEVEL}",
-      ALERT_THRESHOLD = "${var.ALERT_THRESHOLD}",
-      FROM_EMAIL = "${var.FROM_EMAIL}",
-    }
-  }
-}
-
-resource "aws_lambda_function" "crypto_add_emails" {
-  function_name                  = "crypto_add_emails"
-  role                           = aws_iam_role.crypto.arn
-  s3_bucket                      = var.AWS_BUCKET
-  s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
-  handler                        = "service.routes.add_emails.lambda_handler"
+  handler                        = "service.routes.emails.lambda_handler"
   memory_size                    = 3008
   reserved_concurrent_executions = -1
   runtime                        = "python3.7"
