@@ -22,7 +22,7 @@ Sign up for email alerts with a post request:
 ```Shell
 curl --header "Content-Type: application/json" \
   --request POST \
-  --data '{"address":"your_email@email.com"}' \
+  --data '{"email":"your_email@email.com"}' \
   ${API_BASE}/emails
 ```
 
@@ -31,7 +31,7 @@ Remove your email with a DELETE:
 ```Shell
 curl --header "Content-Type: application/json" \
   --request DELETE \
-  --data '{"address":"your_email@email.com"}' \
+  --data '{"email":"your_email@email.com"}' \
   ${API_BASE}/emails
 ```
 
