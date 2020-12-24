@@ -8,7 +8,6 @@ from service.lib import utils as ut
 from service import LOG_LEVEL
 import logging
 from typing import List
-import json
 
 
 logger = logging.getLogger(__name__)

@@ -159,9 +159,9 @@ The main issues I can see are:
 
 #### My app doesn't share DB connections
 
-I don't know how to do connection pooling with API gateway... 
+I don't know how to do connection pooling with API gateway...
 Oh, there is a
-[product](https://aws.amazon.com/blogs/compute/using-amazon-rds-proxy-with-aws-lambda/) 
+[product](https://aws.amazon.com/blogs/compute/using-amazon-rds-proxy-with-aws-lambda/)
 for that. OK so this could have been addressed.
 
 #### The app doesn't cache any results
@@ -181,3 +181,25 @@ I feel like something like Flink would be a better solution
 than Postgres if we wanted to update metrics say, every second.
 I don't have a ton of experience with stream aggregation though, so I'd
 reach for it when I know have a bit more time to experiment.
+
+### Monitoring Metrics and watching for failures
+
+The source of my metrics went down during app development,
+underscoring the need for monitoring.
+Currently if the app hits any kind of HTTP error on request for
+new metrics it will raise a fatal error.
+I could make it so that I'm emailed or otherwise notified when this happens...
+But I didn't.
+
+Another class of failure that is possible is that the metrics service
+responds with a 200, but reports bad data (all 0's or nulls or something).
+I suppose if I was motivated I could develop and install data quality monitoring and
+alerting mechanism. If only there was already some product for that...
+
+### Adding tests
+
+Obviously better test coverage would have been better.
+It would take more effort than I think is appropriate to
+set up automated integration tests.
+Actually it looks like it's not too bad to use a
+[postgres DB in a GHA workflow](https://docs.github.com/en/free-pro-team@latest/actions/guides/creating-postgresql-service-containers)...
