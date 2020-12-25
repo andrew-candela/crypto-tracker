@@ -16,12 +16,15 @@ Sadly, at the time of writing this the livecoin API is down, so I may wind up sw
 *Update*: Looks like Livecoin is in some [serious trouble](https://www.zdnet.com/article/russian-crypto-exchange-livecoin-hacked-after-it-lost-control-of-its-servers/#ftag=RSSbaffb68).
 I probably won't be able to continue collecting metrics from their site.
 I also had nothing to do with this...
-The app stores those metrics in a database,
-and then compares the latest metrics with the averages over the last 24 hours.
 
+Anyway.. the app stores the metrics it collects in a database,
+and then compares the latest metrics with the averages over the last 24 hours.
 You can have the app notify you when a metric value exceeds 3x the 24 hr rolling average.
 
-You can also query the app for historical metrics.
+You can also query the app to display historical metrics.
+
+Here is the main functionality and each endpoint.
+The value of `${API_BASE}` will vary depending on the `Invoke URL` AWS assigns to your API.
 
 ### Email: /emails
 
@@ -90,10 +93,10 @@ to update the three lambda functions.
 
 ## Creating infra with Terraform
 
-Use the terraform files to generate the following ifra:
+Use the terraform files to generate the following infra:
 
 - a postgres database and VPC etc
-- the lambda functions and permissions
+- the lambda functions and needed roles and policies
 - API gateway stuff
 
 You will need to first [install terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
