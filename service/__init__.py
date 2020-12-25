@@ -7,9 +7,9 @@ import os
 load_dotenv()
 LOG_LEVEL = os.getenv("LOG_LEVEL", logging.WARNING)
 ALERT_THRESHOLD = os.getenv("ALERT_THRESHOLD", 3)
-CRYPTO_METRICS = ["last", "high", "low", "volume", "vwap", "max_bid",
-                  "min_ask", "best_bid", "best_ask"]
-METRIC_URL = "https://api.livecoin.net/exchange/ticker"
+CRYPTO_METRICS = ["price"]
+METRIC_URL = "https://api.cryptowat.ch/markets/prices"
+DIMENSION_NAME = "market_symbol_combo"
 
 # set up a base logger
 format_str = '%(asctime)s %(name)s %(levelname)s %(message)s'

@@ -7,22 +7,13 @@ CREATE SCHEMA IF NOT EXISTS crypto;
 -- to satisfy requirements #2 and #3
 -- DROP TABLE IF EXISTS crypto.currency_stats;
 CREATE TABLE IF NOT EXISTS crypto.currency_stats (
-    "cur" varchar(25),
-    "symbol" varchar(25),
-    "last" bigint,
-    "high" bigint,
-    "low" bigint,
-    "volume" bigint,
-    "vwap" bigint,
-    "max_bid" bigint,
-    "min_ask" bigint,
-    "best_bid" float,
-    "best_ask" float,
-    "poll_time" timestamp with time zone
+    "market_symbol_combo" varchar(250),
+    "price" float,
+    "poll_time" timestamp with time zone default current_timestamp
 );
 
 CREATE INDEX IF NOT EXISTS currency_stat_date 
-ON crypto.currency_stats (symbol, poll_time);
+ON crypto.currency_stats (market_symbol_combo, poll_time);
 
 DROP TABLE IF EXISTS crypto.email_recipients;
 CREATE TABLE IF NOT EXISTS crypto.email_recipients (

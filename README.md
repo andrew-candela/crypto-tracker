@@ -10,10 +10,10 @@ The `terraform/` folder has all of the configuration needed to run the app in yo
 
 ## Usage
 
-Each minute the app collects the latest metrics from
-[livecoin's ticker](https://api.livecoin.net/exchange/ticker).
+Every 5 minutes the app collects the latest metrics from
+[CryptoWatch's API](https://docs.cryptowat.ch/rest-api/).
 Sadly, at the time of writing this the livecoin API is down, so I may wind up switching to something else.
-*Update*: Looks like Livecoin is in some [serious trouble](https://www.zdnet.com/article/russian-crypto-exchange-livecoin-hacked-after-it-lost-control-of-its-servers/#ftag=RSSbaffb68).
+*Update*: Looks like Livecoin is in some [serious trouble].
 I probably won't be able to continue collecting metrics from their site.
 I also had nothing to do with this...
 
@@ -25,6 +25,20 @@ You can also query the app to display historical metrics.
 
 Here is the main functionality and each endpoint.
 The value of `${API_BASE}` will vary depending on the `Invoke URL` AWS assigns to your API.
+
+### A note about LiveCoin and CryptoWatch
+
+This project originally used LiveCoin to gather crypto metrics.
+Some bad actors made it into Livecoin's systems and
+[caused some problems](https://www.zdnet.com/article/russian-crypto-exchange-livecoin-hacked-after-it-lost-control-of-its-servers/#ftag=RSSbaffb68).
+They drove up the bitcoin price to about 10x higher than it should have been,
+and then presumably liquidated their assets with the inflated price.
+All this is very interesting, but it has resulted in removal of the public API.
+I'll need to find something else to collect metrics from.
+
+Looks like I can get some data from CryptoWatch's public API.
+Their limits can support polling every 5 mins.
+That's fine for the purposes of this project.
 
 ### Email: /emails
 
@@ -54,17 +68,17 @@ curl ${API_BASE}/emails
 
 ### Metrics: /metrics and /list-metrics
 
-Find the metrics and Symbols available with a GET to `/list-metrics`:
+Find the metrics and Dimensions available with a GET to `/list-metrics`:
 
 ```Shell
 curl ${API_BASE}/list-metrics
 ```
 
 Get a graph of metric performance and rank of standard dev of
-the metric against the same metric of other symbols with a GET to `/metrics`:
+the metric against the same metric of other dimensions with a GET to `/metrics`:
 
 ```Shell
-curl ${API_BASE}/metrics?metric=${your_metric}&symbol=${your_symbol}
+curl ${API_BASE}/metrics?metric=${your_metric}&dimension=${your_dimension}
 ```
 
 ## Local Dev
@@ -90,6 +104,8 @@ and 1 lambda function running on a timer.
 When deploying your code to master (actually any branch), a Github Actions workflow
 will package up your code and deploy it to S3 where it is used
 to update the three lambda functions.
+You'll have to add some secrets to your github repo in order for this step to work
+with your own AWS account.
 
 ## Creating infra with Terraform
 
@@ -140,7 +156,7 @@ but I could make some improvements in the following areas.
 
 Using Postgres for the persistence layer works fairly well with
 small to medium sized amounts of data.
-The index on time/symbol fields in the metrics table speeds up
+The index on time/dimension fields in the metrics table speeds up
 operations a bit, but Postgres will eventually struggle as I get:
 
 - more metrics per row (a columnar DB would be nice for this)
@@ -154,7 +170,7 @@ We'll see..
 
 ### Handling metric 'anomoly' checks better
 
-Currently I'm doing a nested loop over all metrics of all symbols (about 1000)
+Currently I'm doing a nested loop over all metrics of all dimensions (about 1000)
 and all metrics (about 10) to get a list of all the metrics that should trigger an alarm.
 This happens once a minute, and is fairly fast now.
 If I tracked more than 10 metrics - say 1000 - then this app would fall over.
