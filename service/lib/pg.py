@@ -14,6 +14,14 @@ logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
 
 
+def dict_to_str(rec: Dict[str, Any], cols: List[str]) -> str:
+    """prepares a dictionary record for insertion with
+    INSERT INTO table (...) VALUES (), (), ()
+    """
+    tupled_values = ','.join([f"'{rec[col]}'" for col in cols])
+    return f"({tupled_values})"
+
+
 class PG():
 
     @staticmethod
@@ -43,12 +51,12 @@ class PG():
         # This is dangerous as it depends on the same columns being in each record
         cols = data[0].keys()
         col_string = ",".join(cols)
-        val_list = [f"%({col})s" for col in cols]
+        val_list = [dict_to_str(rec, cols) for rec in data]
         val_string = ",".join(val_list)
-        insert_sql = f"INSERT INTO {table} ({col_string}) values ({val_string})"
-
+        insert_sql = f"INSERT INTO {table} ({col_string}) values {val_string}"
+        logger.info(f"trying to write {len(data)} records")
         with conn.cursor() as cursor:
-            cursor.executemany(insert_sql, data)
+            cursor.execute(insert_sql)
             conn.commit()
 
     @staticmethod

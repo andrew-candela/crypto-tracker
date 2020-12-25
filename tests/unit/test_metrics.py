@@ -9,7 +9,7 @@ class TestSuite():
         resp = mt.lambda_handler({'httpMethod': 'POST'}, {})
         assert resp == ut.webify_output("Only GET is supported", 400)
 
-    @patch('service.routes.metrics.fetch_metrics_and_symbols', lambda: 'mock_out')
+    @patch('service.routes.metrics.fetch_metrics_and_dimensions', lambda: 'mock_out')
     def test_lambda_handler_list(self):
         resp = mt.lambda_handler({'httpMethod': 'GET', 'path': '/list-metrics'}, {})
         assert resp == ut.webify_output("mock_out")
@@ -21,7 +21,7 @@ class TestSuite():
             {
                 'httpMethod': 'GET',
                 'path': 'anything',
-                'queryStringParameters': {"metric": "a", "symbol": "b"}
+                'queryStringParameters': {"metric": "a", "dimension": "b"}
             },
             {}
         )

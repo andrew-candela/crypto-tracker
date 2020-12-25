@@ -4,13 +4,11 @@ The intent here is to run this as a scheduled lambda function.
 """
 
 import logging
-import requests
 from service.lib.pg import PG, RealDictRow, connection
 from service.lib.email import Emailer
-from service import LOG_LEVEL, CRYPTO_METRICS, ALERT_THRESHOLD, METRIC_URL
-from datetime import datetime
-from typing import List, Dict, Any, Union
-import time
+from service.lib.cryptowatch_metrics import get_cryptowatch_metrics
+from service import LOG_LEVEL, CRYPTO_METRICS, ALERT_THRESHOLD, DIMENSION_NAME
+from typing import List, Dict, Any
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)
@@ -18,19 +16,19 @@ logger.setLevel(LOG_LEVEL)
 
 
 def data_to_dict(data: List[Dict[str, Any]]) -> Dict[str, Any]:
-    return {rec['symbol']: rec for rec in data}
+    return {rec[DIMENSION_NAME]: rec for rec in data}
 
 
 def generate_historical_sql_command():
     averages = ", ".join([f"avg({metric}) as {metric}" for metric in CRYPTO_METRICS])
     sql_command = f"""SELECT
-        symbol,
+        {DIMENSION_NAME},
         {averages}
     FROM crypto.currency_stats
     WHERE
         poll_time >= NOW() - '1 HOUR'::interval
     GROUP BY
-        symbol
+        {DIMENSION_NAME}
     ;"""
     return sql_command
 
@@ -46,7 +44,7 @@ def compare_metrics(data_dict: Dict[str, Any],
     logger.debug(f"comparing {len(averages)} average records to {len(data_dict)} recent records")
     anomolous_metrics = defaultdict(dict)
     for average_rec in averages:
-        symbol = average_rec['symbol']
+        symbol = average_rec[DIMENSION_NAME]
         for metric in CRYPTO_METRICS:
             try:
                 # many metrics are often 0 or close to it
@@ -54,7 +52,7 @@ def compare_metrics(data_dict: Dict[str, Any],
                   float(average_rec[metric]) * float(ALERT_THRESHOLD) < data_dict[symbol][metric]:
                     anomolous_metrics[symbol][metric] = float(data_dict[symbol][metric])
                     logger.debug(
-                        f"symbol:{symbol} metric: {metric} average last hr: "
+                        f"{DIMENSION_NAME}:{symbol} metric: {metric} average last hr: "
                         f"{average_rec[metric]}  current value: {data_dict[symbol][metric]}"
                     )
             except TypeError as e:
@@ -64,27 +62,6 @@ def compare_metrics(data_dict: Dict[str, Any],
                 )
                 raise e
     return anomolous_metrics
-
-
-def get_utc_offset() -> Union[int, str]:
-    offset = time.timezone if (time.localtime().tm_isdst == 0) else time.altzone
-    offset = int(offset / 60 / 60 * -1)
-    if offset == 0:
-        offset = "-0"
-    return offset
-
-
-def get_metrics() -> List[Dict[str, Any]]:
-    logger.info("getting metrics...")
-    now = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-    utc_offset = get_utc_offset()
-    now += f"{utc_offset}"
-    metrics_payload = requests.get(METRIC_URL)
-    metrics_payload.raise_for_status()
-    metrics = metrics_payload.json()
-    for metric in metrics:
-        metric["poll_time"] = now
-    return metrics
 
 
 def write_metrics(metrics, conn: connection) -> None:
@@ -111,7 +88,7 @@ def fetch_email_recipients(conn: connection) -> List[str]:
 
 
 def lambda_handler(event={}, context={}) -> None:
-    metrics = get_metrics()
+    metrics = get_cryptowatch_metrics()
     data_dict = data_to_dict(metrics)
     logger.info("writing metrics to DB")
     with PG.create_connection() as conn:
