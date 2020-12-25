@@ -3,11 +3,19 @@
 Welcome to the Crypto-Metrics tracker!
 This is a toy app designed to track Crypto metrics and send alerts based on simple thresholds.
 
+The app itself consists of two lambda functions running behind an API gateway.
+There is a third lambda function running on a 1 minute timer to collect data.
+I use a Postgres RDS for the storage layer.
+The `terraform/` folder has all of the configuration needed to run the app in your own account.
+
 ## Usage
 
 Each minute the app collects the latest metrics from
 [livecoin's ticker](https://api.livecoin.net/exchange/ticker).
 Sadly, at the time of writing this the livecoin API is down, so I may wind up switching to something else.
+*Update*: Looks like Livecoin is in some [serious trouble](https://www.zdnet.com/article/russian-crypto-exchange-livecoin-hacked-after-it-lost-control-of-its-servers/#ftag=RSSbaffb68).
+I probably won't be able to continue collecting metrics from their site.
+I also had nothing to do with this...
 The app stores those metrics in a database,
 and then compares the latest metrics with the averages over the last 24 hours.
 
@@ -61,7 +69,7 @@ curl ${API_BASE}/metrics?metric=${your_metric}&symbol=${your_symbol}
 To set up a local environment do the following:
 
 - copy .env.example to .env `cp .env.example .env`
-- fill out the .env file with your app's parameters.
+- fill out the .env file with your app's parameters. `PG_HOST` should be `localhost` in this case.
 - run `docker-compose up -d` to start a postgres DB in the background
 - activate your virtual env and install requirements
 - install the package itself: `pip install -e .`
@@ -69,8 +77,7 @@ To set up a local environment do the following:
 - hack away
 
 I've included `if __name__ == '__main__' ...` blocks in each of the
-files for the lambda functions.
-This way you can invoke your code locally from the terminal if you want.
+files for the lambda functions for convenience.
 
 ## Deploying to production
 
