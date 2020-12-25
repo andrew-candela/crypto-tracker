@@ -175,6 +175,7 @@ and my anomoly loop would take much longer, in addition to requiring a lot of me
 
 If we assume that the size of the data in Postgres remains fixed,
 then this app should do fairly well to serve multiple requests per second.
+
 The main issues I can see are:
 
 #### My app doesn't share DB connections
@@ -194,6 +195,22 @@ I could create a materialized view with the Standard Dev's for each
 metric and updated it every minute when I gather new metrics.
 Then all the app would have to do to serve a request for metrics is
 select from that static table to compute the metric ranks.
+
+#### Load test results
+
+I tried load testing with [locust.io](https://locust.io/).
+The app managed to hold up to about 5 RPS against the `/metrics` and `/list-metrics`
+endpoints simultaneously, with DB CPU reaching about 50%.
+I tried cranking it up to 20 RPS, but that's when the app started having trouble.
+Postgres CPU spiked to about 80%, and the lambda function invocations started timing out.
+
+I think the most effective way to support more requests per second would be to
+re-materialize a view with all requestable metrics each time I bring in new data.
+Since this data only changes once every 5 minutes, the extra computation is nothing
+compared to the savings I'd get by not doing it for every request.
+
+If I do that, I suspect I could serve 20 requests or more per second without increasing
+any resources.
 
 ### Collecting metrics more frequently
 
