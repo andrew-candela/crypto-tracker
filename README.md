@@ -12,19 +12,13 @@ The `terraform/` folder has all of the configuration needed to run the app in yo
 
 Every 5 minutes the app collects the latest metrics from
 [CryptoWatch's API](https://docs.cryptowat.ch/rest-api/).
-Sadly, at the time of writing this the livecoin API is down, so I may wind up switching to something else.
-*Update*: Looks like Livecoin is in some [serious trouble].
-I probably won't be able to continue collecting metrics from their site.
-I also had nothing to do with this...
-
-Anyway.. the app stores the metrics it collects in a database,
+Right now the only metric I collect is `price`.
+The app stores those metrics in a database,
 and then compares the latest metrics with the averages over the last 24 hours.
+
 You can have the app notify you when a metric value exceeds 3x the 24 hr rolling average.
 
-You can also query the app to display historical metrics.
-
-Here is the main functionality and each endpoint.
-The value of `${API_BASE}` will vary depending on the `Invoke URL` AWS assigns to your API.
+You can also query the app for historical metrics.
 
 ### A note about LiveCoin and CryptoWatch
 
@@ -48,7 +42,7 @@ Sign up for email alerts with a post request:
 curl --header "Content-Type: application/json" \
   --request POST \
   --data '{"email":"your_email@email.com"}' \
-  ${API_BASE}/emails
+  "${API_BASE}/emails"
 ```
 
 Remove your email with a DELETE:
@@ -57,13 +51,13 @@ Remove your email with a DELETE:
 curl --header "Content-Type: application/json" \
   --request DELETE \
   --data '{"email":"your_email@email.com"}' \
-  ${API_BASE}/emails
+  "${API_BASE}/emails"
 ```
 
 See what emails are in the list with a GET:
 
 ```Shell
-curl ${API_BASE}/emails
+curl "${API_BASE}/emails"
 ```
 
 ### Metrics: /metrics and /list-metrics
@@ -71,14 +65,14 @@ curl ${API_BASE}/emails
 Find the metrics and Dimensions available with a GET to `/list-metrics`:
 
 ```Shell
-curl ${API_BASE}/list-metrics
+curl "${API_BASE}/list-metrics"
 ```
 
 Get a graph of metric performance and rank of standard dev of
 the metric against the same metric of other dimensions with a GET to `/metrics`:
 
 ```Shell
-curl ${API_BASE}/metrics?metric=${your_metric}&dimension=${your_dimension}
+curl "${API_BASE}/metrics?metric=${your_metric}&dimension=${your_dimension}"
 ```
 
 ## Local Dev
@@ -109,10 +103,10 @@ with your own AWS account.
 
 ## Creating infra with Terraform
 
-Use the terraform files to generate the following infra:
+Use the terraform files to generate the following ifra:
 
 - a postgres database and VPC etc
-- the lambda functions and needed roles and policies
+- the lambda functions and permissions
 - API gateway stuff
 
 You will need to first [install terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
