@@ -5,7 +5,7 @@ CREATE SCHEMA IF NOT EXISTS crypto;
 
 -- I guess I'll also just query this table directly 
 -- to satisfy requirements #2 and #3
-DROP TABLE IF EXISTS crypto.currency_stats;
+-- DROP TABLE IF EXISTS crypto.currency_stats;
 CREATE TABLE IF NOT EXISTS crypto.currency_stats (
     "market_symbol_combo" varchar(250),
     "price" float,
