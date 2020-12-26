@@ -83,3 +83,10 @@ class PG():
 
         row['poll_time'] = row['poll_time'].strftime("%s")
         return row
+
+    @staticmethod
+    def run_sql_command(conn: connection, sql_command: str) -> None:
+        logger.debug(f"running command: {sql_command}")
+        with conn.cursor() as cursor:
+            cursor.execute(sql_command)
+            conn.commit()

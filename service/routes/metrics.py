@@ -82,6 +82,9 @@ def lambda_handler(event: {}, context: {}) -> str:
     # give historical and rank
     if 'metric' not in params or 'dimension' not in params:
         return ut.webify_output("Must supply both 'metric' AND 'dimension' as path params", 400)
+    if params['metric'] not in CRYPTO_METRICS:
+        return ut.webify_output(f"Supplied metric: {params['metric']} not allowed. "
+                                f"Metric must be one of: {CRYPTO_METRICS}", 400)
     historical_data = fetch_historical_performance(params['metric'], params['dimension'])
     rank = fetch_rank(params['metric'], params['dimension'])
     output = {'HistoricalData': historical_data, 'Rank': rank}
