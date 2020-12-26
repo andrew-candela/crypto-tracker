@@ -65,7 +65,6 @@ def compare_metrics(data_dict: Dict[str, Any],
 
 
 def write_metrics(metrics, conn: connection) -> None:
-    logger.info(f"Writing {len(metrics)} metrics to postgres...")
     PG.write_dictionary_to_table(metrics, "crypto.currency_stats", conn)
 
 
@@ -74,7 +73,6 @@ def check_alert(metrics, conn: connection, emails: List[str]):
     sql_command = generate_historical_sql_command()
     averages = PG.fetch_data(conn, sql_command)
     alertable_metrics = compare_metrics(metrics, averages)
-    print(alertable_metrics)
     if alertable_metrics:
         em = Emailer()
         em.send_email(alertable_metrics, emails)

@@ -54,7 +54,7 @@ class PG():
         val_list = [dict_to_str(rec, cols) for rec in data]
         val_string = ",".join(val_list)
         insert_sql = f"INSERT INTO {table} ({col_string}) values {val_string}"
-        logger.info(f"trying to write {len(data)} records")
+        logger.debug(f"trying to write {len(data)} records")
         with conn.cursor() as cursor:
             cursor.execute(insert_sql)
             conn.commit()

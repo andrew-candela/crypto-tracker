@@ -19,19 +19,47 @@ jobs:
     env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        PG_DATABASE: crypto
+        PG_USER: postgres
+        PG_PASSWORD: postgres
+        PG_HOST: postgres
+        PG_PORT: 5432
+
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: crypto
+
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
         - name: Git Checkout
           uses: actions/checkout@v2
           with:
             fetch-depth: 1
-        - name: Set up virtual env and run tests
+        - name: Set up virtual env and run unit tests
           run: |
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
             pip install -e .
             pytest tests/unit
+        - name: Run Integration tests
+          run: | 
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt
+            pip install -e .
+            python scripts/run_migrations.py
 
   deploy:
     name: Deploy Lambda package
