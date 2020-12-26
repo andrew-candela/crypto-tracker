@@ -4,9 +4,21 @@ Welcome to the Crypto-Metrics tracker!
 This is a toy app designed to track Crypto metrics and send alerts based on simple thresholds.
 
 The app itself consists of two lambda functions running behind an API gateway.
-There is a third lambda function running on a 1 minute timer to collect data.
+There is a third lambda function running on a 5 minute timer to collect data.
 I use a Postgres RDS for the storage layer.
+
 The `terraform/` folder has all of the configuration needed to run the app in your own account.
+
+### A note about LiveCoin and CryptoWatch
+
+This project originally used LiveCoin to gather crypto metrics.
+Some bad actors made it into Livecoin's systems and
+[caused some problems](https://www.zdnet.com/article/russian-crypto-exchange-livecoin-hacked-after-it-lost-control-of-its-servers/#ftag=RSSbaffb68).
+They drove up the bitcoin price to about 10x higher than it should have been,
+and then presumably liquidated their assets with the inflated price.
+These events definitely make this project seem appropriate.
+Anyway, this has resulted in removal of LiveCoin's public API.
+I've settled on useng CryptoWatch instead.
 
 ## Usage
 
@@ -19,20 +31,6 @@ and then compares the latest metrics with the averages over the last 24 hours.
 You can have the app notify you when a metric value exceeds 3x the 24 hr rolling average.
 
 You can also query the app for historical metrics.
-
-### A note about LiveCoin and CryptoWatch
-
-This project originally used LiveCoin to gather crypto metrics.
-Some bad actors made it into Livecoin's systems and
-[caused some problems](https://www.zdnet.com/article/russian-crypto-exchange-livecoin-hacked-after-it-lost-control-of-its-servers/#ftag=RSSbaffb68).
-They drove up the bitcoin price to about 10x higher than it should have been,
-and then presumably liquidated their assets with the inflated price.
-All this is very interesting, but it has resulted in removal of the public API.
-I'll need to find something else to collect metrics from.
-
-Looks like I can get some data from CryptoWatch's public API.
-Their limits can support polling every 5 mins.
-That's fine for the purposes of this project.
 
 ### Email: /emails
 
@@ -77,18 +75,15 @@ curl "${API_BASE}/metrics?metric=${your_metric}&dimension=${your_dimension}"
 
 ## Local Dev
 
-To set up a local environment do the following:
+To set up a local environment you must do the following:
 
 - copy .env.example to .env `cp .env.example .env`
 - fill out the .env file with your app's parameters. `PG_HOST` should be `localhost` in this case.
 - run `docker-compose up -d` to start a postgres DB in the background
 - activate your virtual env and install requirements
-- install the package itself: `pip install -e .`
+- install this python package itself: `pip install -e .`
 - run the migration script to create the tables in the DB: `python scripts/run_migrations.py`
 - hack away
-
-I've included `if __name__ == '__main__' ...` blocks in each of the
-files for the lambda functions for convenience.
 
 ## Deploying to production
 
@@ -100,6 +95,10 @@ will package up your code and deploy it to S3 where it is used
 to update the three lambda functions.
 You'll have to add some secrets to your github repo in order for this step to work
 with your own AWS account.
+
+If you're trying to deploy your code but you haven't yet created the lambda functions,
+then the deploymennt pipleing will fail.
+If this happens, follow the steps to create the needed AWS infra with Terraform below.
 
 ## Creating infra with Terraform
 
@@ -147,7 +146,7 @@ pytest test/integration
 Make sure you have activated your virtual env.
 If you haven't already installed the package itself into your virtual env
 then you will have to run: `pip install -e .`.
-If pytest can't find the `service` package then this is probably the reason.
+If you find that pytest can't find the `service` package, this is probably the reason.
 
 ## Productionizing
 
@@ -166,17 +165,16 @@ operations a bit, but Postgres will eventually struggle as I get:
 - more records per unit of time
 - more frequent requests per unit of time
 
-If api.livecoin.net ever comes back online,
 I can probably fit a full day's worth of metrics (about 1.4MM records)
 in my `db.t2.micro` RDS, and support a handful of requests for metrics per second.
 We'll see..
 
 ### Handling metric 'anomoly' checks better
 
-Currently I'm doing a nested loop over all metrics of all dimensions (about 1000)
-and all metrics (about 10) to get a list of all the metrics that should trigger an alarm.
-This happens once a minute, and is fairly fast now.
-If I tracked more than 10 metrics - say 1000 - then this app would fall over.
+Currently I'm doing a nested loop over all dimensions (about 1000)
+and all metrics (only 1) to get a list of all the metrics that should trigger an alarm.
+This happens once every 5 mins, and is fairly fast now.
+If I tracked more than 1 metric - say 1000 - then this app would probably fall over.
 Postgres would have a hard time storing and fetching that many columns as we mentioned above,
 and my anomoly loop would take much longer, in addition to requiring a lot of memory.
 
@@ -205,7 +203,7 @@ metric and updated it every minute when I gather new metrics.
 Then all the app would have to do to serve a request for metrics is
 select from that static table to compute the metric ranks.
 
-#### Load test results
+#### Results from doing load testing
 
 I tried load testing with [locust.io](https://locust.io/).
 The app managed to hold up to about 5 RPS against the `/metrics` and `/list-metrics`
@@ -244,7 +242,8 @@ alerting mechanism. If only there was already some product for that...
 
 ### Adding tests
 
-Obviously better test coverage would have been better.
+Obviously better test coverage would have been better,
+but coverage is not that bad right now.
 It was way easier than I expected to set up an environment
 suitable for integration tests in Github Actions.
 I followed [these instructions](https://docs.github.com/en/free-pro-team@latest/actions/guides/creating-postgresql-service-containers)
