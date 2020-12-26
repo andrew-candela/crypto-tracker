@@ -45,6 +45,10 @@ def compare_metrics(data_dict: Dict[str, Any],
     anomolous_metrics = defaultdict(dict)
     for average_rec in averages:
         symbol = average_rec[DIMENSION_NAME]
+        if symbol not in data_dict:
+            logger.warning(f"{symbol} is no longer in current data pull. "
+                           "Please ensure we are still tracking it.")
+            continue
         for metric in CRYPTO_METRICS:
             try:
                 # many metrics are often 0 or close to it
@@ -65,7 +69,6 @@ def compare_metrics(data_dict: Dict[str, Any],
 
 
 def write_metrics(metrics, conn: connection) -> None:
-    logger.info(f"Writing {len(metrics)} metrics to postgres...")
     PG.write_dictionary_to_table(metrics, "crypto.currency_stats", conn)
 
 
@@ -74,10 +77,8 @@ def check_alert(metrics, conn: connection, emails: List[str]):
     sql_command = generate_historical_sql_command()
     averages = PG.fetch_data(conn, sql_command)
     alertable_metrics = compare_metrics(metrics, averages)
-    print(alertable_metrics)
     if alertable_metrics:
-        em = Emailer()
-        em.send_email(alertable_metrics, emails)
+        Emailer.send_email(alertable_metrics, emails)
         return None
     logger.info("Found 0 records worthy of an alert")
 

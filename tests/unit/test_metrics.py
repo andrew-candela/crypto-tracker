@@ -21,7 +21,7 @@ class TestSuite():
             {
                 'httpMethod': 'GET',
                 'path': 'anything',
-                'queryStringParameters': {"metric": "a", "dimension": "b"}
+                'queryStringParameters': {"metric": "price", "dimension": "b"}
             },
             {}
         )

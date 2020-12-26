@@ -135,10 +135,19 @@ python scripts/run_migrations.py
 ## Run tests
 
 I use pytest to run the test suite.
-Activate your virtual env and then run the tests with: `pytest`.
+run the tests like this:
+
+```Shell
+# run unit tests
+pytest tests/unit
+# run integration tests
+pytest test/integration
+```
+
+Make sure you have activated your virtual env.
 If you haven't already installed the package itself into your virtual env
 then you will have to run: `pip install -e .`.
-Do this if pytest can't find your code.
+If pytest can't find the `service` package then this is probably the reason.
 
 ## Productionizing
 
@@ -236,7 +245,8 @@ alerting mechanism. If only there was already some product for that...
 ### Adding tests
 
 Obviously better test coverage would have been better.
-It would take more effort than I think is appropriate to
-set up automated integration tests.
-Actually it looks like it's not too bad to use a
-[postgres DB in a GHA workflow](https://docs.github.com/en/free-pro-team@latest/actions/guides/creating-postgresql-service-containers)...
+It was way easier than I expected to set up an environment
+suitable for integration tests in Github Actions.
+I followed [these instructions](https://docs.github.com/en/free-pro-team@latest/actions/guides/creating-postgresql-service-containers)
+to set up a postgres database to make it available for my tests suite.
+Now I have a fair amount of integration test coverage as well.
