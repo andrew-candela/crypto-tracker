@@ -60,6 +60,7 @@ jobs:
             pip install -r requirements.txt
             pip install -e .
             python scripts/run_migrations.py
+            pytest tests/integration
 
   deploy:
     name: Deploy Lambda package
