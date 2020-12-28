@@ -3,6 +3,7 @@ It will also support removal of notifications...
 I expect the notifications will be quite noisy.
 """
 
+from psycopg2.errors import UniqueViolation
 from service.lib.pg import PG
 from service.lib import utils as ut
 from service import LOG_LEVEL
@@ -23,8 +24,12 @@ def get_emails() -> List[str]:
 
 def add_email_address(email: str) -> None:
     logger.debug(f"adding email {email}")
-    with PG.create_connection() as conn:
-        PG.write_dictionary_to_table([{"address": email}], "crypto.email_recipients", conn)
+    try:
+        with PG.create_connection() as conn:
+            PG.write_dictionary_to_table([{"address": email}], "crypto.email_recipients", conn)
+    except UniqueViolation:
+        logger.debug(f"Email: {email} has already been added")
+        return None
 
 
 def remove_email_address(email: str) -> None:

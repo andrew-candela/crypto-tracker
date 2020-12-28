@@ -33,3 +33,21 @@ class TestSuite(unittest.TestCase):
         em.lambda_handler(event, {})
         emails = em.get_emails()
         assert set(emails) == set([])
+
+    def test_add_existing_email(self):
+        event = {
+            'httpMethod': 'POST',
+            'body': '{"email":"test@email.com"}'
+        }
+        em.lambda_handler(event, {})
+        emails = em.get_emails()
+        assert set(emails) == set(['test@email.com'])
+
+    def test_add_new_email(self):
+        event = {
+            'httpMethod': 'POST',
+            'body': '{"email":"test2@email.com"}'
+        }
+        em.lambda_handler(event, {})
+        emails = em.get_emails()
+        assert set(emails) == set(['test@email.com', 'test2@email.com'])
