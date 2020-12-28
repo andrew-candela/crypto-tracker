@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(LOG_LEVEL)
 
 
+REFRESH_MATERIALIZED_VIEW = "REFRESH MATERIALIZED VIEW last_days_standard_deviation;"
+DROP_OLD_DATA = "DELETE FROM crypto.currency_stats WHERE poll_time <= NOW() - '2 DAYS'::interval;"
+
+
 def data_to_dict(data: List[Dict[str, Any]]) -> Dict[str, Any]:
     return {rec[DIMENSION_NAME]: rec for rec in data}
 
@@ -88,6 +92,11 @@ def fetch_email_recipients(conn: connection) -> List[str]:
     return [rec['address'] for rec in recs]
 
 
+def cleanup(conn: connection) -> None:
+    PG.run_sql_command(conn, DROP_OLD_DATA)
+    PG.run_sql_command(conn, REFRESH_MATERIALIZED_VIEW)
+
+
 def lambda_handler(event={}, context={}) -> None:
     metrics = get_cryptowatch_metrics()
     data_dict = data_to_dict(metrics)
@@ -96,6 +105,7 @@ def lambda_handler(event={}, context={}) -> None:
         write_metrics(metrics, conn)
         email_recipients = fetch_email_recipients(conn)
         check_alert(data_dict, conn, email_recipients)
+        cleanup(conn)
 
 
 if __name__ == "__main__":
