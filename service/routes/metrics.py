@@ -44,15 +44,11 @@ def fetch_historical_performance(metric: str, dimension: str) -> List[RealDictRo
 
 def fetch_rank(metric: str, dimension: str) -> str:
     sql_rank = f"""SELECT
-        {DIMENSION_NAME} as dimension,
-        stddev({metric}) as {metric}_stddev
+        dimension,
+        {metric}_stddev
     FROM
-        crypto.currency_stats
-    WHERE
-        poll_time >= NOW() - '1 DAY'::interval
-    GROUP BY
-        {DIMENSION_NAME}
-    ORDER BY stddev({metric}) DESC
+        last_days_standard_deviation
+    ORDER BY {metric}_stddev DESC
     ;"""
     with PG.create_connection() as conn:
         stdev_ranks = PG.fetch_data(conn, sql_rank)
@@ -93,7 +89,7 @@ def lambda_handler(event: {}, context: {}) -> str:
 
 if __name__ == "__main__":
     event = {
-        'path': '/list-metrics',
+        'path': '/metrics',
         'httpMethod': 'GET',
         'queryStringParameters': {"metric": "price", "dimension": "market:bitstamp:omggbp"}
     }

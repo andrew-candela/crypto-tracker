@@ -19,3 +19,17 @@ DROP TABLE IF EXISTS crypto.email_recipients;
 CREATE TABLE IF NOT EXISTS crypto.email_recipients (
     "address" varchar(250) primary key
 );
+
+DROP MATERIALIZED VIEW IF EXISTS last_days_standard_deviation;
+CREATE MATERIALIZED VIEW last_days_standard_deviation AS 
+SELECT
+    market_symbol_combo as dimension,
+    stddev(price) as price_stddev
+FROM
+    crypto.currency_stats
+WHERE
+    poll_time >= NOW() - '1 DAY'::interval
+GROUP BY
+    market_symbol_combo
+having stddev(price) is not null
+;

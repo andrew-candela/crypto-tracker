@@ -18,6 +18,7 @@ class TestSuite(unittest.TestCase):
     def setUp(self):
         with PG.create_connection() as conn:
             gm.write_metrics(mock_metric_historical_data, conn)
+            gm.cleanup(conn)
 
     def tearDown(self):
         sql = "DELETE FROM crypto.currency_stats"
