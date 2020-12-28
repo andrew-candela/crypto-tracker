@@ -9,6 +9,13 @@ I use a Postgres RDS for the storage layer.
 
 The `terraform/` folder has all of the configuration needed to run the app in your own account.
 
+This app costs me about $0.50 to run per day.
+Most of that spend is due to the `db.t2.micro` RDS instance.
+While I was working on this, the price of Bitcoin on the Livecoin exchange fluctuated wildly.
+It rose about 10x over current market rates, probably due to malicious activity.
+It just goes to show what potential an app like this has.
+If you're a savvy bitcoin trader, this project could be quite useful for you!
+
 ### A note about LiveCoin and CryptoWatch
 
 This project originally used LiveCoin to gather crypto metrics.
