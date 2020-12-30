@@ -17,7 +17,7 @@ logger.setLevel(LOG_LEVEL)
 
 
 def fetch_metrics_and_dimensions() -> Dict[str, Any]:
-    sql_command = f"SELECT DISTINCT {DIMENSION_NAME} FROM crypto.currency_stats"
+    sql_command = "SELECT DISTINCT dimension FROM crypto.last_days_standard_deviation"
     with PG.create_connection() as conn:
         unique_dimensions = PG.fetch_data(conn, sql_command)
     out_dict = {
