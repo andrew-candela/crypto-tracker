@@ -3,7 +3,7 @@ resource aws_db_instance crypto_db {
   instance_class                        = "db.t2.micro"
   allocated_storage                     = 20
   engine                                = "postgres"
-  engine_version                        = 11.5
+  engine_version                        = 11.8
   multi_az                              = false
   option_group_name                     = "default:postgres-11"
   parameter_group_name                  = "default.postgres11"

@@ -4,10 +4,10 @@ resource "aws_lambda_function" "crypto_batch" {
   s3_bucket                      = var.AWS_BUCKET
   s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
   handler                        = "service.get_metrics.lambda_handler"
-  memory_size                    = 3008
+  memory_size                    = 128
   reserved_concurrent_executions = -1
   runtime                        = "python3.7"
-  timeout                        = 15
+  timeout                        = 20
   tracing_config {
       mode = "PassThrough"
   }
@@ -32,7 +32,7 @@ resource "aws_lambda_function" "crypto_metrics" {
   s3_bucket                      = var.AWS_BUCKET
   s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
   handler                        = "service.routes.metrics.lambda_handler"
-  memory_size                    = 3008
+  memory_size                    = 128
   reserved_concurrent_executions = -1
   runtime                        = "python3.7"
   timeout                        = 5
@@ -60,7 +60,7 @@ resource "aws_lambda_function" "crypto_email" {
   s3_bucket                      = var.AWS_BUCKET
   s3_key                         = "lambda_functions_deployment_packages/crypto/function.zip"
   handler                        = "service.routes.emails.lambda_handler"
-  memory_size                    = 3008
+  memory_size                    = 128
   reserved_concurrent_executions = -1
   runtime                        = "python3.7"
   timeout                        = 5
@@ -85,8 +85,8 @@ resource "aws_lambda_function" "crypto_email" {
 
 # Schedule the lambda function
 resource "aws_cloudwatch_event_rule" "cadence" {
-  name                = "every-one-minute"
-  description         = "Fires every one minutes"
+  name                = "cadence"
+  description         = "Fires every 5 minutes"
   schedule_expression = "rate(5 minutes)"
 }
 
