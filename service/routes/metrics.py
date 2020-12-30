@@ -17,7 +17,7 @@ logger.setLevel(LOG_LEVEL)
 
 
 def fetch_metrics_and_dimensions() -> Dict[str, Any]:
-    sql_command = "SELECT DISTINCT dimension FROM crypto.last_days_standard_deviation"
+    sql_command = "SELECT DISTINCT dimension FROM last_days_standard_deviation"
     with PG.create_connection() as conn:
         unique_dimensions = PG.fetch_data(conn, sql_command)
     out_dict = {
@@ -89,7 +89,7 @@ def lambda_handler(event: {}, context: {}) -> str:
 
 if __name__ == "__main__":
     event = {
-        'path': '/metrics',
+        'path': '/list-metrics',
         'httpMethod': 'GET',
         'queryStringParameters': {"metric": "price", "dimension": "market:bitstamp:omggbp"}
     }
