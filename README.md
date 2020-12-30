@@ -35,7 +35,9 @@ Right now the only metric I collect is `price`.
 The app stores those metrics in a database,
 and then compares the latest metrics with the averages over the last 24 hours.
 
-You can have the app notify you when a metric value exceeds 3x the 24 hr rolling average.
+You can have the app notify you when a metric value exceeds `ALERT_THRESHOLD`x the 24 hr rolling average.
+You can set `ALERT_THRESHOLD` in your .env file.
+I moved this from `3` to `10` because this can get noisy.
 
 You can also query the app for historical metrics.
 
