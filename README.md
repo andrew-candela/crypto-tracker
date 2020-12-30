@@ -9,6 +9,13 @@ I use a Postgres RDS for the storage layer.
 
 The `terraform/` folder has all of the configuration needed to run the app in your own account.
 
+This app costs me about $0.50 to run per day.
+Most of that spend is due to the `db.t2.micro` RDS instance.
+While I was working on this, the price of Bitcoin on the Livecoin exchange fluctuated wildly.
+It rose about 10x over current market rates, probably due to malicious activity.
+It just goes to show what potential an app like this has.
+If you're a savvy bitcoin trader, this project could be quite useful for you!
+
 ### A note about LiveCoin and CryptoWatch
 
 This project originally used LiveCoin to gather crypto metrics.
@@ -194,14 +201,17 @@ for that. OK so this could have been addressed.
 
 #### The app doesn't cache any results
 
-If this was a popular app then I would like to not have to
-re-compute the standard deviation of every metric every time someone
-makes a request.
+As I've allowed the database to accumulate a few million records,
+I've noticed the performance of the `/metrics` endpoint has started to suffer.
+To account for this, I've created a materialized view that computes the
+standard deviation for the dimensions and metrics (right now only 1 dimension and 1 metric).
+Every time the app collects new data from CryptoWatch it refreshes the view.
+This has gotten response times for the `/metrics` endpoint back down to around 100ms.
+Before this patch, it was taking around 4.5 seconds to resolve a request.
 
-I could create a materialized view with the Standard Dev's for each
-metric and updated it every minute when I gather new metrics.
-Then all the app would have to do to serve a request for metrics is
-select from that static table to compute the metric ranks.
+This effectively fixes the caching problem, as the database needs to only select all of the
+rows in the very small materialized view and return them to the client.
+I suspect this will allow the endpoint to support much greater traffic than before.
 
 #### Results from doing load testing
 
@@ -216,12 +226,12 @@ re-materialize a view with all requestable metrics each time I bring in new data
 Since this data only changes once every 5 minutes, the extra computation is nothing
 compared to the savings I'd get by not doing it for every request.
 
-If I do that, I suspect I could serve 20 requests or more per second without increasing
-any resources.
+I Haven't tried load testing the app since I've made the change to use the materialized view.
+I'll update here once I get a chance to do so.
 
 ### Collecting metrics more frequently
 
-I feel like something like Flink would be a better solution
+I feel like something like Flink or AWS's stream analytics might be a better solution
 than Postgres if we wanted to update metrics say, every second.
 I don't have a ton of experience with stream aggregation though, so I'd
 reach for it when I know have a bit more time to experiment.
@@ -243,7 +253,7 @@ alerting mechanism. If only there was already some product for that...
 ### Adding tests
 
 Obviously better test coverage would have been better,
-but coverage is not that bad right now.
+but coverage is pretty good right now.
 It was way easier than I expected to set up an environment
 suitable for integration tests in Github Actions.
 I followed [these instructions](https://docs.github.com/en/free-pro-team@latest/actions/guides/creating-postgresql-service-containers)
