@@ -160,8 +160,14 @@ If you find that pytest can't find the `service` package, this is probably the r
 ## Productionizing
 
 There are a few shortcuts that I've taken here.
-I think the app is fairly scalable the way it is,
-but I could make some improvements in the following areas.
+Although I don't think this is suitable for production, the app is fairly scalable the way it is.
+I could make some improvements in the following areas.
+
+### Protecting the app from SQL injection
+
+I didn't take the time to pass inputs from the user to the DB in a sane way.
+It would be good to sanitize the inputs so you don't get
+[Bobby Tabled](https://xkcd.com/327/).
 
 ### Scaling Postgres
 
