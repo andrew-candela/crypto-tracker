@@ -2,6 +2,7 @@
 
 Welcome to the Crypto-Metrics tracker!
 This is a toy app designed to track Crypto metrics and send alerts based on simple thresholds.
+It's also a fun excuse to get some experience with AWS's API Gateway.
 
 The app itself consists of two lambda functions running behind an API gateway.
 There is a third lambda function running on a 5 minute timer to collect data.
@@ -159,111 +160,6 @@ If you find that pytest can't find the `service` package, this is probably the r
 
 ## Productionizing
 
-There are a few shortcuts that I've taken here.
-Although I don't think this is suitable for production, the app is fairly scalable the way it is.
-I could make some improvements in the following areas.
-
-### Protecting the app from SQL injection
-
-I didn't take the time to pass inputs from the user to the DB in a sane way.
-It would be good to sanitize the inputs so you don't get
-[Bobby Tabled](https://xkcd.com/327/).
-
-### Scaling Postgres
-
-Using Postgres for the persistence layer works fairly well with
-small to medium sized amounts of data.
-The index on time/dimension fields in the metrics table speeds up
-operations a bit, but Postgres will eventually struggle as I get:
-
-- more metrics per row (a columnar DB would be nice for this)
-- more records per unit of time
-- more frequent requests per unit of time
-
-I can probably fit a full day's worth of metrics (about 1.4MM records)
-in my `db.t2.micro` RDS, and support a handful of requests for metrics per second.
-We'll see..
-
-### Handling metric 'anomoly' checks better
-
-Currently I'm doing a nested loop over all dimensions (about 1000)
-and all metrics (only 1) to get a list of all the metrics that should trigger an alarm.
-This happens once every 5 mins, and is fairly fast now.
-If I tracked more than 1 metric - say 1000 - then this app would probably fall over.
-Postgres would have a hard time storing and fetching that many columns as we mentioned above,
-and my anomoly loop would take much longer, in addition to requiring a lot of memory.
-
-### Querying the metrics through the API often
-
-If we assume that the size of the data in Postgres remains fixed,
-then this app should do fairly well to serve multiple requests per second.
-
-The main issues I can see are:
-
-#### My app doesn't share DB connections
-
-I don't know how to do connection pooling with API gateway...
-Oh, there is a
-[product](https://aws.amazon.com/blogs/compute/using-amazon-rds-proxy-with-aws-lambda/)
-for that. OK so this could have been addressed.
-
-#### The app doesn't cache any results
-
-As I've allowed the database to accumulate a few million records,
-I've noticed the performance of the `/metrics` endpoint has started to suffer.
-To account for this, I've created a materialized view that computes the
-standard deviation for the dimensions and metrics (right now only 1 dimension and 1 metric).
-Every time the app collects new data from CryptoWatch it refreshes the view.
-This has gotten response times for the `/metrics` endpoint back down to around 100ms.
-Before this patch, it was taking around 4.5 seconds to resolve a request.
-
-This effectively fixes the caching problem, as the database needs to only select all of the
-rows in the very small materialized view and return them to the client.
-I suspect this will allow the endpoint to support much greater traffic than before.
-
-#### Results from doing load testing
-
-I tried load testing with [locust.io](https://locust.io/).
-The app managed to hold up to about 5 RPS against the `/metrics` and `/list-metrics`
-endpoints simultaneously, with DB CPU reaching about 50%.
-I tried cranking it up to 20 RPS, but that's when the app started having trouble.
-Postgres CPU spiked to about 80%, and the lambda function invocations started timing out.
-
-I think the most effective way to support more requests per second would be to
-re-materialize a view with all requestable metrics each time I bring in new data.
-Since this data only changes once every 5 minutes, the extra computation is nothing
-compared to the savings I'd get by not doing it for every request.
-
-I Haven't tried load testing the app since I've made the change to use the materialized view.
-I'll update here once I get a chance to do so.
-
-### Collecting metrics more frequently
-
-I feel like something like Flink or AWS's stream analytics might be a better solution
-than Postgres if we wanted to update metrics say, every second.
-I don't have a ton of experience with stream aggregation though, so I'd
-reach for it when I know have a bit more time to experiment.
-
-### Monitoring Metrics and watching for failures
-
-The source of my metrics went down during app development,
-underscoring the need for monitoring.
-Currently if the app hits any kind of HTTP error on request for
-new metrics it will raise a fatal error.
-I could make it so that I'm emailed or otherwise notified when this happens...
-But I didn't.
-
-Another class of failure that is possible is that the metrics service
-responds with a 200, but reports bad data (all 0's or nulls or something).
-I suppose if I was motivated I could develop and install data quality monitoring and
-alerting mechanism. If only there was already some product for that...
-
-### Adding tests
-
-Obviously better test coverage would have been better,
-but coverage is pretty good right now.
-It was way easier than I expected to set up an environment
-suitable for integration tests in Github Actions.
-I followed [these instructions](https://docs.github.com/en/free-pro-team@latest/actions/guides/creating-postgresql-service-containers)
-to set up a postgres database to make it available for my tests suite.
-Now I have a fair amount of integration test coverage as well.
+I've taken a lot of shortcuts to get this to work.
+If you're going to make a project like this production ready, I'd suggest
+using a framework like Django.
