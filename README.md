@@ -1,32 +1,9 @@
 # Crypto Metrics Tracker
 
-Welcome to the Crypto-Metrics tracker!
-This is a toy app designed to track Crypto metrics and send alerts based on simple thresholds.
-It's also a fun excuse to get some experience with AWS's API Gateway.
-
-The app itself consists of two lambda functions running behind an API gateway.
-There is a third lambda function running on a 5 minute timer to collect data.
-I use a Postgres RDS for the storage layer.
-
-The `terraform/` folder has all of the configuration needed to run the app in your own account.
-
-This app costs me about $0.50 to run per day.
-Most of that spend is due to the `db.t2.micro` RDS instance.
-While I was working on this, the price of Bitcoin on the Livecoin exchange fluctuated wildly.
-It rose about 10x over current market rates, probably due to malicious activity.
-It just goes to show what potential an app like this has.
-If you're a savvy bitcoin trader, this project could be quite useful for you!
-
-### A note about LiveCoin and CryptoWatch
-
-This project originally used LiveCoin to gather crypto metrics.
-Some bad actors made it into Livecoin's systems and
-[caused some problems](https://www.zdnet.com/article/russian-crypto-exchange-livecoin-hacked-after-it-lost-control-of-its-servers/#ftag=RSSbaffb68).
-They drove up the bitcoin price to about 10x higher than it should have been,
-and then presumably liquidated their assets with the inflated price.
-These events definitely make this project seem appropriate.
-Anyway, this has resulted in removal of LiveCoin's public API.
-I've settled on useng CryptoWatch instead.
+This was an assignment for a job interview a few years ago and I went way overboard.
+If I could go back in time I would have just stood up a Django app.
+If you insist on going the serverless/lambda route, I'd highly recommend
+[AWS Chalice](https://github.com/aws/chalice).
 
 ## Usage
 
